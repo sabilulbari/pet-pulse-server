@@ -3,10 +3,9 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 
-
 require("dotenv").config();
 app.use(cors());
-app.use(express.json())
+app.use(express.json());
 
 const port = process.env.PORT;
 
@@ -24,35 +23,35 @@ async function run() {
   try {
     await client.connect();
 
-    const db = client.db("pet-pulse")
-    const allPetCollection = db.collection("All-added-pet")
+    const db = client.db("pet-pulse");
+    const allPetCollection = db.collection("All-added-pet");
+    const allAdoptionReqCollection = db.collection("All-Adoption-req");
 
-    app.post("/addPet", async(req, res)=>{
-        const allPets = await req.body;
-        const result = await allPetCollection.insertOne(allPets)
-        res.json(result)
-    })
+    app.post("/addPet", async (req, res) => {
+      const allPets = await req.body;
+      const result = await allPetCollection.insertOne(allPets);
+      res.json(result);
+    });
 
-    app.get("/all-pets", async(req, res)=>{
-      const result = await allPetCollection.find().toArray()
-      res.send(result)
-    })
+    app.get("/all-pets", async (req, res) => {
+      const result = await allPetCollection.find().toArray();
+      res.send(result);
+    });
 
-    app.get('/all-pets/:petId', async(req, res)=>{
+    app.get("/all-pets/:petId", async (req, res) => {
       const { petId } = await req.params;
-      const result = await allPetCollection.findOne({ _id:new ObjectId(petId) })
-      res.send(result)
-    })
+      const result = await allPetCollection.findOne({ _id: new ObjectId(petId) });
+      res.send(result);
+    });
 
-    app.get('/', async(req, res)=>{
-        res.send("Server is ready")
-    })
+    app.get("/", async (req, res) => {
+      res.send("Server is ready");
+    });
     app.get("/add-pet", async (req, res) => {
       res.send("This api is working");
     });
-    
   } finally {
-   //
+    //
   }
 }
 run().catch(console.dir);
