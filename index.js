@@ -33,6 +33,12 @@ async function run() {
       res.json(result);
     });
 
+    app.post("/adoptnow", async (req, res) => {
+      const adoptReq = await req.body;
+      const result = await allAdoptionReqCollection.insertOne(adoptReq);
+      res.json(result);
+    });
+
     app.get("/all-pets", async (req, res) => {
       const result = await allPetCollection.find().toArray();
       res.send(result);
