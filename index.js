@@ -39,6 +39,11 @@ async function run() {
       res.json(result);
     });
 
+    app.get("/adoptnow", async (req, res) => {
+      const result = await allAdoptionReqCollection.find().toArray();
+      res.send(result);
+    });
+
     app.get("/all-pets", async (req, res) => {
       const result = await allPetCollection.find().toArray();
       res.send(result);
