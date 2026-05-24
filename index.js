@@ -39,8 +39,9 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/adoptnow", async (req, res) => {
-      const result = await allAdoptionReqCollection.find().toArray();
+    app.get("/adoptnow/:ownerEmail", async (req, res) => {
+      const { ownerEmail } = await req.params;
+      const result = await allAdoptionReqCollection.find({ ownerEmail }).toArray();
       res.send(result);
     });
 
