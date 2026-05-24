@@ -39,6 +39,15 @@ async function run() {
       res.json(result);
     });
 
+    app.patch("/adoptnow/:id", async (req, res) => {
+      const { id }= await req.params;
+      const actionReq = await req.body;
+      const result = await allAdoptionReqCollection.updateOne({ _id: new ObjectId(id) }, { $set: actionReq });
+      res.json(result);
+    });
+
+
+
     app.get("/adoptnow/:ownerEmail", async (req, res) => {
       const { ownerEmail } = await req.params;
       const result = await allAdoptionReqCollection.find({ ownerEmail }).toArray();
