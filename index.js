@@ -39,14 +39,32 @@ async function run() {
       res.json(result);
     });
 
-    app.patch("/adoptnow/:id", async (req, res) => {
-      const { id }= await req.params;
-      const actionReq = await req.body;
-      const result = await allAdoptionReqCollection.updateOne({ _id: new ObjectId(id) }, { $set: actionReq });
+    app.patch("/adoptnow/approveReq/:id", async (req, res) => {
+      const { id } = await req.params;
+      const result = await allAdoptionReqCollection.updateOne({ _id: new ObjectId(id) }, { $set: { status: "Approved" } });
       res.json(result);
     });
 
+    app.patch("/adoptnow/rejectReq/:id", async (req, res) => {
+      const { id } = await req.params;
+      const result = await allAdoptionReqCollection.updateOne({ _id: new ObjectId(id) }, { $set: { status: "Rejected" } });
+      res.json(result);
+    });
 
+    // app.patch("/adoptnow/actionReq/:id", async (req, res) => {
+    //   try {
+    //     const { id } = req.params;
+    //     const actionReq = req.body;
+    //     console.log(actionReq, "from backend");
+
+    //     const result = await allAdoptionReqCollection.updateOne({ _id: new ObjectId(id) }, { $set: { status: "Approve" } });
+
+    //     res.json(result);
+    //   } catch (error) {
+    //     console.error(error);
+    //     res.status(500).json({ error: "Something went wrong" });
+    //   }
+    // });
 
     app.get("/adoptnow/:ownerEmail", async (req, res) => {
       const { ownerEmail } = await req.params;
