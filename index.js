@@ -27,6 +27,14 @@ async function run() {
     const allPetCollection = db.collection("All-added-pet");
     const allAdoptionReqCollection = db.collection("All-Adoption-req");
 
+    //all delete request
+    app.delete("/addPet/:id", async(req, res)=>{
+      const {id} = await req.params;
+      const result = await allPetCollection.deleteOne({ _id: new ObjectId(id) });
+      res.json(result);
+    });
+
+    // All post requests
     app.post("/addPet", async (req, res) => {
       const allPets = await req.body;
       const result = await allPetCollection.insertOne(allPets);
@@ -39,6 +47,7 @@ async function run() {
       res.json(result);
     });
 
+    // all patch request
     app.patch("/adoptnow/approveReq/:id", async (req, res) => {
       const { id } = await req.params;
       const result = await allAdoptionReqCollection.updateOne({ _id: new ObjectId(id) }, { $set: { status: "Approved" } });
@@ -51,21 +60,15 @@ async function run() {
       res.json(result);
     });
 
-    // app.patch("/adoptnow/actionReq/:id", async (req, res) => {
-    //   try {
-    //     const { id } = req.params;
-    //     const actionReq = req.body;
-    //     console.log(actionReq, "from backend");
+    app.patch("/addPet/:id", async (req, res) => {
+      const { id } = await req.params;
+      const updatedData = req.body
+      console.log(updatedData);
+      const result = await allPetCollection.updateOne({ _id: new ObjectId(id) }, { $set: updatedData });
+      res.json(result);
+    });
 
-    //     const result = await allAdoptionReqCollection.updateOne({ _id: new ObjectId(id) }, { $set: { status: "Approve" } });
-
-    //     res.json(result);
-    //   } catch (error) {
-    //     console.error(error);
-    //     res.status(500).json({ error: "Something went wrong" });
-    //   }
-    // });
-
+    // all get request
     app.get("/adoptnow/:ownerEmail", async (req, res) => {
       const { ownerEmail } = await req.params;
       const result = await allAdoptionReqCollection.find({ ownerEmail }).toArray();
@@ -80,6 +83,12 @@ async function run() {
     app.get("/all-pets/:petId", async (req, res) => {
       const { petId } = await req.params;
       const result = await allPetCollection.findOne({ _id: new ObjectId(petId) });
+      res.send(result);
+    });
+
+    app.get("/all-pets/my-listing/:ownerEmail", async (req, res) => {
+      const { ownerEmail } = await req.params;
+      const result = await allPetCollection.find({ ownerEmail }).toArray() ;
       res.send(result);
     });
 
