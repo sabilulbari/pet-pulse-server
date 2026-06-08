@@ -69,9 +69,17 @@ async function run() {
     });
 
     // all get request
+
+
     app.get("/adoptnow/:ownerEmail", async (req, res) => {
       const { ownerEmail } = await req.params;
       const result = await allAdoptionReqCollection.find({ ownerEmail }).toArray();
+      res.send(result);
+    });
+
+    app.get("/adoptnow/my-request/:reqUserEmail", async (req, res) => {
+      const { reqUserEmail } = await req.params;
+      const result = await allAdoptionReqCollection.find({ reqUserEmail }).toArray();
       res.send(result);
     });
 
@@ -90,6 +98,12 @@ async function run() {
       const { ownerEmail } = await req.params;
       const result = await allPetCollection.find({ ownerEmail }).toArray() ;
       res.send(result);
+    });
+
+    app.get("/all-pets/my-listing/adoptReq/:petName", async (req, res) => {
+      const { petName } = await req.params;
+      const result = await allAdoptionReqCollection.find({ petName }).toArray();
+      res.send(result, "all this pet request");
     });
 
     app.get("/", async (req, res) => {
