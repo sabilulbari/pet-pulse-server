@@ -20,15 +20,14 @@ const client = new MongoClient(uri, {
   },
 });
 
-const JWKS = createRemoteJWKSet(new URL("http://localhost:3000/api/auth/jwks"));
+const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URL}/api/auth/jwks`));
 
 const verifyToken = async (req, res, next) => {
-  const authHeader = req?.headers.authorization;  
+  const authHeader = req?.headers.authorization;
   if (!authHeader) {
     return res.status(401).json({ message: "Unauthorized" });
   }
   const token = authHeader.split(" ")[1];
-
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });
   }
@@ -44,21 +43,21 @@ const verifyToken = async (req, res, next) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("pet-pulse");
     const allPetCollection = db.collection("All-added-pet");
     const allAdoptionReqCollection = db.collection("All-Adoption-req");
 
     //all delete request
-    app.delete("/addPet/:id", async (req, res) => {
+    app.delete("/addPet/:id", verifyToken, async (req, res) => {
       const { id } = await req.params;
       const result = await allPetCollection.deleteOne({ _id: new ObjectId(id) });
       res.json(result);
     });
 
     // All post requests
-    app.post("/addPet", async (req, res) => {
+    app.post("/addPet", verifyToken, async (req, res) => {
       const allPets = await req.body;
       const result = await allPetCollection.insertOne(allPets);
       res.json(result);
@@ -71,7 +70,7 @@ async function run() {
     });
 
     // all patch request
-    app.patch("/adoptnow/approveReq/:id", async (req, res) => {
+    app.patch("/adoptnow/approveReq/:id", verifyToken, async (req, res) => {
       const { id } = await req.params;
       const petStatus = await allAdoptionReqCollection.findOne({ _id: new ObjectId(id) });
       const petData = await allPetCollection.updateOne({ _id: new ObjectId(petStatus.petId) }, { $set: { status: "Approved" } });
@@ -81,13 +80,13 @@ async function run() {
       res.json(result);
     });
 
-    app.patch("/adoptnow/rejectReq/:id", async (req, res) => {
+    app.patch("/adoptnow/rejectReq/:id",verifyToken, async (req, res) => {
       const { id } = await req.params;
       const result = await allAdoptionReqCollection.updateOne({ _id: new ObjectId(id) }, { $set: { status: "Rejected" } });
       res.json(result);
     });
 
-    app.patch("/addPet/:id", async (req, res) => {
+    app.patch("/addPet/:id", verifyToken, async (req, res) => {
       const { id } = await req.params;
       const updatedData = req.body;
       console.log(updatedData);
@@ -97,13 +96,7 @@ async function run() {
 
     // all get request
 
-    app.get("/adoptnow/:ownerEmail", async (req, res) => {
-      const { ownerEmail } = await req.params;
-      const result = await allAdoptionReqCollection.find({ ownerEmail }).toArray();
-      res.send(result);
-    });
-
-    app.get("/adoptnow/my-request/:reqUserEmail", async (req, res) => {
+    app.get("/adoptnow/my-request/:reqUserEmail", verifyToken, async (req, res) => {
       const { reqUserEmail } = await req.params;
       const result = await allAdoptionReqCollection.find({ reqUserEmail }).toArray();
       res.send(result);
@@ -120,22 +113,14 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/all-pets/allAdoptReq/:petId", async (req, res) => {
-      const { petId } = req.params;
-      const result = await allAdoptionReqCollection.findOne({
-        _id: new ObjectId(petId),
-      });
-      console.log(petId, result);
-      res.send(result);
-    });
-
-    app.get("/all-pets/my-listing/:ownerEmail", async (req, res) => {
+    app.get("/all-pets/my-listing/:ownerEmail", verifyToken, async (req, res) => {
       const { ownerEmail } = await req.params;
       const result = await allPetCollection.find({ ownerEmail }).toArray();
       res.send(result);
     });
 
-    app.get("/all-pets/my-listing/adoptReq/:petName", async (req, res) => {
+    app.get("/all-pets/my-listing/adoptReq/:petName",verifyToken, async (req, res) => {
+      console.log("Data");
       const { petName } = await req.params;
       const result = await allAdoptionReqCollection.find({ petName }).toArray();
       res.send(result, "all this pet request");
@@ -143,9 +128,6 @@ async function run() {
 
     app.get("/", async (req, res) => {
       res.send("Server is ready");
-    });
-    app.get("/add-pet", async (req, res) => {
-      res.send("This api is working");
     });
   } finally {
     //
