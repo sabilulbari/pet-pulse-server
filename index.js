@@ -2,6 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 
 require("dotenv").config();
 app.use(cors());
@@ -18,6 +19,28 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
+const JWKS = createRemoteJWKSet(new URL("http://localhost:3000/api/auth/jwks"));
+
+const verifyToken = async (req, res, next) => {
+  const authHeader = req?.headers.authorization;  
+  if (!authHeader) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const { payload } = await jwtVerify(token, JWKS);
+    next();
+    console.log(payload, "payload");
+  } catch (error) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
+};
 
 async function run() {
   try {
@@ -41,7 +64,7 @@ async function run() {
       res.json(result);
     });
 
-    app.post("/adoptnow", async (req, res) => {
+    app.post("/adoptnow", verifyToken, async (req, res) => {
       const adoptReq = await req.body;
       const result = await allAdoptionReqCollection.insertOne(adoptReq);
       res.json(result);
@@ -50,7 +73,7 @@ async function run() {
     // all patch request
     app.patch("/adoptnow/approveReq/:id", async (req, res) => {
       const { id } = await req.params;
-      const petStatus = await allAdoptionReqCollection.findOne({_id: new ObjectId(id)})
+      const petStatus = await allAdoptionReqCollection.findOne({ _id: new ObjectId(id) });
       const petData = await allPetCollection.updateOne({ _id: new ObjectId(petStatus.petId) }, { $set: { status: "Approved" } });
       console.log(petStatus);
       console.log(petData);
@@ -91,7 +114,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/all-pets/:petId", async (req, res) => {
+    app.get("/all-pets/:petId", verifyToken, async (req, res) => {
       const { petId } = await req.params;
       const result = await allPetCollection.findOne({ _id: new ObjectId(petId) });
       res.send(result);
