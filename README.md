@@ -5,7 +5,7 @@ The Pet Pals Backend is a RESTful API built with Node.js, Express.js, and MongoD
 
 ## 🌐 Live API
 
-https://pet-pulse-server.vercel.app/
+🔗 https://pet-pulse-server.vercel.app/
 
 ---
 
@@ -145,7 +145,7 @@ server/
 Clone the repository:
 
 ```bash
-git clone <your-backend-repository-link>
+git clone https://github.com/sabilulbari/pet-pulse-server.git
 ```
 
 Install dependencies:
