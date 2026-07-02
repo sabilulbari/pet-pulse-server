@@ -55,6 +55,11 @@ async function run() {
       const result = await allPetCollection.deleteOne({ _id: new ObjectId(id) });
       res.json(result);
     });
+    app.delete("/myrequest/cancleReq/:id", verifyToken, async (req, res) => {
+      const { id } = await req.params;
+      const result = await allAdoptionReqCollection.deleteOne({ _id: new ObjectId(id) });
+      res.json(result);
+    });
 
     // All post requests
     app.post("/addPet", verifyToken, async (req, res) => {
